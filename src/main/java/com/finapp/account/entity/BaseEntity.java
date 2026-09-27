@@ -1,8 +1,6 @@
 package com.finapp.account.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -37,5 +35,20 @@ public class BaseEntity {
     @Column(insertable = false)
     private String updatedBy;
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        if (this.createdBy == null) {
+            this.createdBy = "SYSTEM"; // Fallback default value
+        }
+    }
 
+    // 3. Pro-Tip: Add a companion hook to handle modifications automatically
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+        if (this.updatedBy == null) {
+            this.updatedBy = "SYSTEM"; // Fallback default value
+        }
+    }
 }

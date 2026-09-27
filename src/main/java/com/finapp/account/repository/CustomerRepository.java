@@ -14,8 +14,8 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
        Customer findByMobileNumber(String phoneNumber);
        Customer findByCustomerId(Long customerId);
        Customer findByEmail(String email);
-       Customer findByName(String name);
-       Customer findByEmailAndName(String email,String name);
-       List<Customer> findByEmailOrName(String email, String name);
+       Customer findByFullName(String fullName);
+       Customer findByEmailAndFullName(String email,String fullName);
+       List<Customer> findByEmailOrFullName(String email, String fullName);
 
 }

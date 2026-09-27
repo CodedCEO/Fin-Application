@@ -4,6 +4,8 @@ package com.finapp.account.controller;
 import com.finapp.account.constants.AccountsConstants;
 import com.finapp.account.dto.CustomerDto;
 import com.finapp.account.dto.ResponseDto;
+import com.finapp.account.dto.response.FinappCustomResponseDto;
+import com.finapp.account.enums.Status;
 import com.finapp.account.service.impl.AccountsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +17,24 @@ import com.finapp.account.service.IAccountsService;
 
 
 @RestController
+@RequestMapping("/api/accounts")
 public class AccountsController {
 
     @Autowired
     private AccountsServiceImpl accountsService;
 
-    @PostMapping("/api/create")
-    public ResponseEntity<ResponseDto> createAccount( @RequestBody CustomerDto customerDto) {
-        accountsService.createAccount(customerDto);
+    @PostMapping("/create")
+    public ResponseEntity<FinappCustomResponseDto<Long>> createAccount(@RequestBody CustomerDto customerDto) {
+        Long accountNumber = accountsService.createAccount(customerDto);
+        FinappCustomResponseDto<Long> accountResponse = new FinappCustomResponseDto<>(
+                AccountsConstants.MESSAGE_201,
+                accountNumber,
+                Status.SUCCESS
+
+        );
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ResponseDto(AccountsConstants.MESSAGE_201));
+                .body(accountResponse);
     }
 
     @GetMapping("/api/fetch")
