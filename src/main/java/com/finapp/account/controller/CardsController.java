@@ -30,12 +30,11 @@ public class CardsController {
         CardCreationResponseDto  cardCreationResponseDto = iCardsService.createCard(requestCardDto);
 
         FinappCustomResponseDto<CardCreationResponseDto> responseBody = new FinappCustomResponseDto<>(
-                CardsConstants.MESSAGE_201,  // The success message
-                cardCreationResponseDto,        // The actual card data payload
-                Status.SUCCESS              // Assuming Status is an enum
+                CardsConstants.MESSAGE_201,
+                cardCreationResponseDto,
+                Status.SUCCESS
         );
 
-        // 3. Return the exact matching types with HTTP 201 Created status
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(responseBody);
@@ -46,13 +45,14 @@ public class CardsController {
     public ResponseEntity<FinappCustomResponseDto<Void>> activateCard(
             @Valid @RequestBody ActivateCardRequestDto activateCardRequestDto) {
 
+        iCardsService.activateCard(activateCardRequestDto);
+
         FinappCustomResponseDto<Void> responseBody = new FinappCustomResponseDto<>(
                 CardsConstants.MESSAGE_301,
                null,
                 Status.SUCCESS
         );
 
-        // 3. Return the exact matching types with HTTP 201 Created status
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(responseBody);

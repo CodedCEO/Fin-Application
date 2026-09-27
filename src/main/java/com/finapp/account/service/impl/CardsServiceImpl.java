@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HexFormat;
 
@@ -99,7 +100,7 @@ public class CardsServiceImpl implements ICardsService {
 
         String customerName = customerRepository.findByCustomerId(account.getCustomerId()).getFullName().toUpperCase();
 
-        //accountService.transfer(accountNumber, cardFeeAccount, cardType.getFee());
+        accountService.transfer(accountNumber, cardFeeAccount, cardType.getFee());
 
         String cardPan = generateCardPan(cardType.getPanLength());
         String defaultPin = generateDefaultCardPin();
@@ -125,6 +126,7 @@ public class CardsServiceImpl implements ICardsService {
                 .cardReference(trackingReference)
                 .cardActivated(false)
                 .cardName(customerName)
+                .accontBalance(accountBalance)
                 .pan(formatPanWithHyphens(cardPan))
                 .cvv(cvv)
                 .defaultPin(defaultPin)
@@ -136,24 +138,33 @@ public class CardsServiceImpl implements ICardsService {
 
     @Override
     public void activateCard(ActivateCardRequestDto activateCardRequestDto) {
-        String hashNewPin = "";
+
         validateActivateCardRequest(activateCardRequestDto);
+
         Cards card = cardsRepository.findByAccountNumber(activateCardRequestDto.getAccountNumber())
                 .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "No card found"));
-        boolean defaultPinMatch = verifyPin(activateCardRequestDto.getDefaultPin(), card.getEncryptedPin());
-        boolean cvvMatch = verifyCvv(activateCardRequestDto.getCvv(), card.getEncryptedCvv());
 
-
-        if(defaultPinMatch && cvvMatch) {
-            hashNewPin = hashPin(activateCardRequestDto.getNewPin().trim());
+        if(card.isCardActive()){
+            throw new FinAppValidationException(HttpStatus.FORBIDDEN,"Card is already activated");
         }
 
-       // String newPin = card.setEncryptedPin(StringUtils.hasText(hashNewPin) ? card.setEncryptedPin(hashNewPin) : card.getEncryptedPin());
+        boolean defaultPinMatch = verifyPin(activateCardRequestDto.getDefaultPin().trim(), card.getEncryptedPin());
+        boolean cvvMatch = verifyCvv(activateCardRequestDto.getCvv().trim(), card.getEncryptedCvv());
 
-       // card.setEncryptedPin(newPin);
+
+        if (!defaultPinMatch || !cvvMatch) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "Invalid default PIN or CVV provided");
+        }
+
+        String hashNewPin = hashPin(activateCardRequestDto.getNewPin().trim());
+
+        card.setEncryptedPin(hashNewPin);
         card.setCardActive(true);
+        card.setUpdatedAt(LocalDateTime.now());
+
         cardsRepository.save(card);
 
+        log.info("Card activation successful");
     }
 //
 //    @Override
