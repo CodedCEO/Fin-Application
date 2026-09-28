@@ -22,6 +22,10 @@ public final class CardsConstants {
 
     public static final String STATUS_200 = "200";
     public static final String MESSAGE_301 = "Card activated successfully";
+    public static final String MESSAGE_302 = "Card deactivated successfully";
+    public static final String MESSAGE_303 = "Card reactivated successfully";
+
+
     public static final String STATUS_417 = "417";
     public static final String MESSAGE_417_ACTIVATION = "Deactivation operation failed. Please try again or contact Customer Service";
     // public static final String  STATUS_500 = "500";

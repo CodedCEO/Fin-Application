@@ -74,4 +74,7 @@ public class Cards extends BaseEntity {
     @Column(name = "card_fee_account")
     private String cardFeeAccount;
 
+    @Column(name = "card_can_transact", nullable = false)
+    private boolean cardCanTransact;
+
 }

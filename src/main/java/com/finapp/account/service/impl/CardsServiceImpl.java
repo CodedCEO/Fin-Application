@@ -3,7 +3,9 @@ package com.finapp.account.service.impl;
 import com.finapp.account.constants.CardsConstants;
 import com.finapp.account.dto.request.ActivateCardRequestDto;
 import com.finapp.account.dto.request.CardDetailResponseDto;
+import com.finapp.account.dto.request.UpdateCardStatusRequestDto;
 import com.finapp.account.entity.Account;
+import com.finapp.account.entity.Customer;
 import com.finapp.account.enums.Status;
 import com.finapp.account.exception.FinAppValidationException;
 import com.finapp.account.repository.AccountsRepository;
@@ -33,7 +35,6 @@ import org.springframework.util.StringUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.smartcardio.Card;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -62,7 +63,7 @@ public class CardsServiceImpl implements ICardsService {
     private String panSecret;
 
     @Value("${card.fee.account}")
-    private Long cardFeeAccount;
+    private String cardFeeAccount;
 
     @Value("${card.expiry}")
     private int cardExpiry;
@@ -73,6 +74,7 @@ public class CardsServiceImpl implements ICardsService {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
 
     public CardCreationResponseDto createCard(RequestCardDto requestCardDto) {
@@ -104,9 +106,16 @@ public class CardsServiceImpl implements ICardsService {
 
         Cards cards = CardsMapper.mapToCardCreation(requestCardDto,new Cards());
 
-        String customerName = customerRepository.findByCustomerId(account.getCustomerId()).getFullName().toUpperCase();
+        Customer customer = customerRepository.findByCustomerId(account.getCustomerId());
 
-        //accountService.transfer(accountNumber, cardFeeAccount, cardType.getFee());
+        String customerName = customer.getFullName().toUpperCase();
+
+        Long cardFeeDestinationAccount = Long.parseLong(getCardFeeAccount(cardFeeAccount));
+
+        log.info("Performing card transaction on senderAccountNumber={}, destinationAccountNumber={}, amount={}",
+                accountNumber, cardFeeDestinationAccount, cardType.getFee());
+
+        accountService.transfer(accountNumber, cardFeeDestinationAccount, cardType.getFee());
 
         String cardPan = generateCardPan(cardType.getPanLength());
         String defaultPin = generateDefaultCardPin();
@@ -124,16 +133,20 @@ public class CardsServiceImpl implements ICardsService {
         cards.setMaskedPan(maskPan(cardPan));
         cards.setEncryptedPin(hashPin(defaultPin));
         cards.setAccount(account);
+        cards.setCardCanTransact(false);
         cards.setTotalLimit(cardLimit);
         cards.setPanLength(cardType.getPanLength());
 
         cardsRepository.save(cards);
 
+        Account updatedAccount = accountsRepository.findByCustomerId(account.getCustomerId());;
+        BigDecimal newBalance = updatedAccount.getAccountBalance();
+
         return CardCreationResponseDto.builder()
                 .cardReference(trackingReference)
                 .cardActivated(false)
                 .cardName(customerName)
-                .accontBalance(accountBalance)
+                .accontBalance(newBalance)
                 .pan(formatPanWithHyphens(cardPan))
                 .cvv(cvv)
                 .defaultPin(defaultPin)
@@ -171,6 +184,7 @@ public class CardsServiceImpl implements ICardsService {
 
         card.setEncryptedPin(hashNewPin);
         card.setCardActivated(true);
+        card.setCardCanTransact(true);
         card.setCardStatus(Status.ACTIVE.name());
         card.setCardActivatedAt(LocalDateTime.now());
         card.setUpdatedAt(LocalDateTime.now());
@@ -209,10 +223,93 @@ public class CardsServiceImpl implements ICardsService {
         return PaginatedResponseDto.from(cards);
     }
 //
-//    @Override
-//    public boolean deactivateCard(String CardNumber) {
-//        return false;
-//    }
+    @Override
+    public void deactivateCard(UpdateCardStatusRequestDto updateCardStatusRequestDto) {
+        if(updateCardStatusRequestDto == null) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST,"Request body cannot be null or empty.");
+        }
+
+        String accNumber = updateCardStatusRequestDto.getAccountNumber();
+
+        if (!StringUtils.hasText(accNumber)){
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "accountNumber is required.");
+        }else if(accNumber.trim().length() != 10) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "accountNumber must be 10 digits");
+        }
+
+        if (!StringUtils.hasText(updateCardStatusRequestDto.getCurrentPin())){
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "currentPin is required.");
+        }else if (updateCardStatusRequestDto.getCurrentPin().trim().length() != 4) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "currentPin must be 4 digits");
+        }
+
+        Account account = accountsRepository.findByAccountNumber(Long.parseLong(accNumber.trim()))
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "Account not found."));
+
+
+        Cards card = cardsRepository.findByAccountNumber(updateCardStatusRequestDto.getAccountNumber().trim())
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "Card not found."));
+
+        if(card.getCardStatus() == Status.INACTIVE.name()) {
+            throw new FinAppValidationException(HttpStatus.FORBIDDEN, "Card is already deactivated");
+        }
+
+
+        if(verifyPin(updateCardStatusRequestDto.getCurrentPin(), card.getEncryptedPin()) && account.isAccountActive()) {
+            card.setCardStatus(Status.INACTIVE.name());
+            card.setCardCanTransact(false);
+            card.
+            card.setUpdatedAt(LocalDateTime.now());
+
+            cardsRepository.save(card);
+        }
+
+        log.info("Card with accountNumber={} is successfully deactivated",accNumber);
+
+    }
+
+    @Override
+    public void reactivateCard(UpdateCardStatusRequestDto updateCardStatusRequestDto) {
+        if(updateCardStatusRequestDto == null) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST,"Request body cannot be null or empty.");
+        }
+
+        String accNumber = updateCardStatusRequestDto.getAccountNumber();
+
+        if (!StringUtils.hasText(accNumber)){
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "accountNumber is required.");
+        }else if(accNumber.trim().length() != 10) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "accountNumber must be 10 digits");
+        }
+
+        if (!StringUtils.hasText(updateCardStatusRequestDto.getCurrentPin())){
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "currentPin is required.");
+        }else if (updateCardStatusRequestDto.getCurrentPin().trim().length() != 4) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "currentPin must be 4 digits");
+        }
+
+        Account account = accountsRepository.findByAccountNumber(Long.parseLong(accNumber.trim()))
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "Account not found."));
+
+
+        Cards card = cardsRepository.findByAccountNumber(updateCardStatusRequestDto.getAccountNumber().trim())
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "Card not found."));
+
+        if(card.getCardStatus() == Status.ACTIVE.name()) {
+            throw new FinAppValidationException(HttpStatus.FORBIDDEN, "Card is already active");
+        }
+
+        if(verifyPin(updateCardStatusRequestDto.getCurrentPin(), card.getEncryptedPin()) && account.isAccountActive()) {
+            card.setCardStatus(Status.ACTIVE.name());
+            card.setCardCanTransact(true);
+            card.setUpdatedAt(LocalDateTime.now());
+
+            cardsRepository.save(card);
+        }
+
+        log.info("Card with accountNumber={} is successfully reactivated",accNumber);
+
+    }
 //
 //    @Override
 //    public boolean deleteCard(Long cardId) {
@@ -470,6 +567,22 @@ public class CardsServiceImpl implements ICardsService {
         return accountsRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND,
                         "Account does not exist or is inactive. Kindly contact your business concierge"));
+    }
+
+    private String getCardFeeAccount(String email) {
+        String cardFeeCollectionAccount = "";
+        Customer customer = customerRepository.findByEmail(cardFeeAccount)
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "User not found."));
+
+        Account account = accountsRepository.findByCustomerId(customer.getCustomerId());
+
+        if (account != null){
+            if (account.getAccountNumber() != null){
+                cardFeeCollectionAccount = String.valueOf(account.getAccountNumber());
+            }
+        }
+
+        return cardFeeCollectionAccount;
     }
 
 

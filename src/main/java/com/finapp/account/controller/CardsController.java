@@ -3,6 +3,7 @@ package com.finapp.account.controller;
 import com.finapp.account.constants.CardsConstants;
 import com.finapp.account.dto.request.ActivateCardRequestDto;
 import com.finapp.account.dto.request.CardDetailResponseDto;
+import com.finapp.account.dto.request.UpdateCardStatusRequestDto;
 import com.finapp.account.dto.request.RequestCardDto;
 import com.finapp.account.dto.response.CardCreationResponseDto;
 import com.finapp.account.dto.response.FinappCustomResponseDto;
@@ -91,6 +92,42 @@ public class CardsController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
+                .body(responseBody);
+
+    }
+
+    @PatchMapping("/deactivate")
+    public ResponseEntity<FinappCustomResponseDto<Void>> deactivateCard(
+            @Valid @RequestBody UpdateCardStatusRequestDto updateCardStatusRequestDto) {
+
+        iCardsService.deactivateCard(updateCardStatusRequestDto);
+
+        FinappCustomResponseDto<Void> responseBody = new FinappCustomResponseDto<>(
+                CardsConstants.MESSAGE_302,
+                null,
+                Status.SUCCESS
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(responseBody);
+
+    }
+
+    @PatchMapping("/reactivate")
+    public ResponseEntity<FinappCustomResponseDto<Void>> reactivateCard(
+            @Valid @RequestBody UpdateCardStatusRequestDto updateCardStatusRequestDto) {
+
+        iCardsService.reactivateCard(updateCardStatusRequestDto);
+
+        FinappCustomResponseDto<Void> responseBody = new FinappCustomResponseDto<>(
+                CardsConstants.MESSAGE_303,
+                null,
+                Status.SUCCESS
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
                 .body(responseBody);
 
     }

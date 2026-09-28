@@ -20,4 +20,6 @@ public class CardDetailResponseDto {
     private String branch;
     private LocalDateTime createdAt;
     private String cardStatus;
+    private boolean canTransact;
+    private boolean cardActivated;
 }

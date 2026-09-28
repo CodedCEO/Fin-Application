@@ -1,6 +1,7 @@
 package com.finapp.account.repository;
 
 
+import com.finapp.account.entity.Account;
 import com.finapp.account.entity.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,9 +14,10 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
    // "select * from customer " +"where mobile_number = 08066439570"
        Customer findByMobileNumber(String phoneNumber);
        Customer findByCustomerId(Long customerId);
-       Customer findByEmail(String email);
+       Optional<Customer> findByEmail(String email);
        Customer findByFullName(String fullName);
        Customer findByEmailAndFullName(String email,String fullName);
        List<Customer> findByEmailOrFullName(String email, String fullName);
+
 
 }

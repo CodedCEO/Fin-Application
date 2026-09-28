@@ -5,6 +5,7 @@ import com.finapp.account.dto.request.CardDetailResponseDto;
 import com.finapp.account.entity.Account;
 import com.finapp.account.dto.request.RequestCardDto;
 import com.finapp.account.entity.Cards;
+import com.finapp.account.enums.Status;
 
 public class CardsMapper {
 
@@ -19,6 +20,10 @@ public class CardsMapper {
     }
 
     public static CardDetailResponseDto mapToCardDetailDto(Cards card) {
+        boolean cardIsActive = false;
+        if(card.getCardStatus() == Status.ACTIVE.name()) {
+            cardIsActive = true;
+        }
 
         return CardDetailResponseDto.builder()
                 .cardType(card.getCardType())
@@ -28,9 +33,11 @@ public class CardsMapper {
                 .cardName(card.getCardName())
                 .maskedPan(card.getMaskedPan())
                 .expireAt(card.getExpiration())
-                .active(card.isCardActivated())
+                .active(cardIsActive)
                 .createdAt(card.getCreatedAt())
                 .requestMode(card.getRequestMode())
+                .canTransact(card.isCardCanTransact())
+                .cardActivated(card.isCardActivated())
                 .build();
     }
 

@@ -4,6 +4,7 @@ public enum Status {
     ACTIVE,
     INACTIVE,
     SUCCESS,
-    PENDING_ACTIVATION
+    PENDING_ACTIVATION,
+
 
 }
