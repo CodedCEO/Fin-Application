@@ -12,6 +12,8 @@ public final class CardsConstants {
     public static final String STATUS_PENDING_ACTIVATION = "Pending Activation";
     public static final String STATUS_201 = "201";
     public static final String MESSAGE_201 = "Card created successfully";
+    public static final String MESSAGE_202 = "Card record retrieved successfully";
+
 
     public static final String STATUS_200 = "200";
     public static final String MESSAGE_301 = "Card activated successfully";

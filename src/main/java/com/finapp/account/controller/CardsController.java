@@ -2,6 +2,7 @@ package com.finapp.account.controller;
 
 import com.finapp.account.constants.CardsConstants;
 import com.finapp.account.dto.request.ActivateCardRequestDto;
+import com.finapp.account.dto.request.CardDetailResponseDto;
 import com.finapp.account.dto.request.RequestCardDto;
 import com.finapp.account.dto.response.CardCreationResponseDto;
 import com.finapp.account.dto.response.FinappCustomResponseDto;
@@ -11,10 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/cards")
@@ -58,5 +56,24 @@ public class CardsController {
                 .body(responseBody);
 
     }
+
+    @GetMapping("/{accountNumber}")
+    public ResponseEntity<FinappCustomResponseDto<CardDetailResponseDto>> getSingleCard(
+            @PathVariable(name = "accountNumber") String accountNumber) {
+
+        CardDetailResponseDto cardDetailResponseDto = iCardsService.fetchSingleCard(accountNumber);
+
+        FinappCustomResponseDto<CardDetailResponseDto> responseBody = new FinappCustomResponseDto<>(
+                CardsConstants.MESSAGE_202,
+                cardDetailResponseDto,
+                Status.SUCCESS
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .body(responseBody);
+
+    }
+
 
 }

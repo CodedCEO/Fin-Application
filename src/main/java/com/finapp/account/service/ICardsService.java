@@ -1,12 +1,14 @@
 package com.finapp.account.service;
 
 import com.finapp.account.dto.request.ActivateCardRequestDto;
+import com.finapp.account.dto.request.CardDetailResponseDto;
 import com.finapp.account.dto.request.RequestCardDto;
 import com.finapp.account.dto.response.CardCreationResponseDto;
 
 public interface ICardsService {
     CardCreationResponseDto createCard(RequestCardDto requestCardDto);
     void activateCard(ActivateCardRequestDto activateCardRequestDto);
+    CardDetailResponseDto fetchSingleCard(String accountNumber);
 //    RequestCardDto fetchCard(Long cardId);
 //    boolean deactivateCard(String CardNumber);
 //    //boolean updateCard(CardsDto cardsDto);

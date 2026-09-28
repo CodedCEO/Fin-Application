@@ -22,7 +22,7 @@ public class Cards extends BaseEntity {
     @Column(name = "card_name", nullable = false)
     private String cardName;
 
-    @Column(name = "account_number", nullable = false)
+    @Column(name = "account_number", nullable = false, unique = true)
     private String accountNumber;
 
     @Column(name = "pan_hash", nullable = false)
@@ -52,12 +52,11 @@ public class Cards extends BaseEntity {
     @Column(name = "is_card_activated", nullable = false)
     private boolean cardActivated;
 
-    @Column(name = "card_activated_at", nullable = false)
+    @Column(name = "card_activated_at")
     private LocalDateTime cardActivatedAt;
 
     @Column(name = "card_status", nullable = false)
     private String cardStatus;
-
 
     @Column(name = "encrypted_pin")
     private String encryptedPin;

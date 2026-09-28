@@ -1,6 +1,7 @@
 package com.finapp.account.service.impl;
 
 import com.finapp.account.dto.request.ActivateCardRequestDto;
+import com.finapp.account.dto.request.CardDetailResponseDto;
 import com.finapp.account.entity.Account;
 import com.finapp.account.enums.Status;
 import com.finapp.account.exception.FinAppValidationException;
@@ -26,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.smartcardio.Card;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -98,7 +100,7 @@ public class CardsServiceImpl implements ICardsService {
 
         String customerName = customerRepository.findByCustomerId(account.getCustomerId()).getFullName().toUpperCase();
 
-        accountService.transfer(accountNumber, cardFeeAccount, cardType.getFee());
+        //accountService.transfer(accountNumber, cardFeeAccount, cardType.getFee());
 
         String cardPan = generateCardPan(cardType.getPanLength());
         String defaultPin = generateDefaultCardPin();
@@ -147,7 +149,7 @@ public class CardsServiceImpl implements ICardsService {
             throw new FinAppValidationException(HttpStatus.FORBIDDEN,"Card is already activated");
         }
 
-        if(!validateCardStatus(card)) {
+        if(validateCardStatus(card)) {
             throw new FinAppValidationException(HttpStatus.FORBIDDEN, "Card is inactive. Kindly contact your business concierge");
         }
 
@@ -170,6 +172,20 @@ public class CardsServiceImpl implements ICardsService {
         cardsRepository.save(card);
 
         log.info("Card activation successful");
+    }
+
+    @Override
+    public CardDetailResponseDto fetchSingleCard(String accountNumber) {
+        if(!StringUtils.hasText(accountNumber)) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "accountNumber cannot be empty or null.");
+        }
+
+        log.info("accountNumber={}", accountNumber);
+
+        Cards card = cardsRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "Card does not exist"));
+
+        return CardsMapper.mapToCardDetailDto(card);
     }
 //
 //    @Override
