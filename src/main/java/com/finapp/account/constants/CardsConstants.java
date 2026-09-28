@@ -13,6 +13,11 @@ public final class CardsConstants {
     public static final String STATUS_201 = "201";
     public static final String MESSAGE_201 = "Card created successfully";
     public static final String MESSAGE_202 = "Card record retrieved successfully";
+    public static final String MESSAGE_203 = "Card records retrieved successfully";
+
+    public static final String DEFAULT_PAGE_NUMBER = "0";
+    public static final String DEFAULT_PAGE_SIZE = "10";
+    public static final int MAX_PAGE_SIZE = 100;
 
 
     public static final String STATUS_200 = "200";

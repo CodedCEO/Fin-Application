@@ -6,6 +6,7 @@ import com.finapp.account.dto.request.CardDetailResponseDto;
 import com.finapp.account.dto.request.RequestCardDto;
 import com.finapp.account.dto.response.CardCreationResponseDto;
 import com.finapp.account.dto.response.FinappCustomResponseDto;
+import com.finapp.account.dto.response.PaginatedResponseDto;
 import com.finapp.account.enums.Status;
 import com.finapp.account.service.ICardsService;
 import jakarta.validation.Valid;
@@ -75,5 +76,23 @@ public class CardsController {
 
     }
 
+    @GetMapping
+    public ResponseEntity<FinappCustomResponseDto<PaginatedResponseDto<CardDetailResponseDto>>> getAllCards(
+            @RequestParam(name = "page", defaultValue = CardsConstants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(name = "size", defaultValue = CardsConstants.DEFAULT_PAGE_SIZE) int size) {
+
+        PaginatedResponseDto<CardDetailResponseDto> cards = iCardsService.fetchAllCards(page, size);
+
+        FinappCustomResponseDto<PaginatedResponseDto<CardDetailResponseDto>> responseBody = new FinappCustomResponseDto<>(
+                CardsConstants.MESSAGE_203,
+                cards,
+                Status.SUCCESS
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseBody);
+
+    }
 
 }

@@ -4,11 +4,13 @@ import com.finapp.account.dto.request.ActivateCardRequestDto;
 import com.finapp.account.dto.request.CardDetailResponseDto;
 import com.finapp.account.dto.request.RequestCardDto;
 import com.finapp.account.dto.response.CardCreationResponseDto;
+import com.finapp.account.dto.response.PaginatedResponseDto;
 
 public interface ICardsService {
     CardCreationResponseDto createCard(RequestCardDto requestCardDto);
     void activateCard(ActivateCardRequestDto activateCardRequestDto);
     CardDetailResponseDto fetchSingleCard(String accountNumber);
+    PaginatedResponseDto<CardDetailResponseDto> fetchAllCards(int page, int size);
 //    RequestCardDto fetchCard(Long cardId);
 //    boolean deactivateCard(String CardNumber);
 //    //boolean updateCard(CardsDto cardsDto);

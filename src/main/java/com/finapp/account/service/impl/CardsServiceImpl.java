@@ -1,5 +1,6 @@
 package com.finapp.account.service.impl;
 
+import com.finapp.account.constants.CardsConstants;
 import com.finapp.account.dto.request.ActivateCardRequestDto;
 import com.finapp.account.dto.request.CardDetailResponseDto;
 import com.finapp.account.entity.Account;
@@ -10,6 +11,7 @@ import com.finapp.account.repository.CustomerRepository;
 import com.finapp.account.service.IAccountsService;
 import com.finapp.account.dto.request.RequestCardDto;
 import com.finapp.account.dto.response.CardCreationResponseDto;
+import com.finapp.account.dto.response.PaginatedResponseDto;
 import com.finapp.account.entity.Cards;
 import com.finapp.account.enums.CardType;
 import com.finapp.account.enums.RequestMode;
@@ -19,6 +21,10 @@ import com.finapp.account.service.ICardsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -186,6 +192,21 @@ public class CardsServiceImpl implements ICardsService {
                 .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "Card does not exist"));
 
         return CardsMapper.mapToCardDetailDto(card);
+    }
+
+    @Override
+    public PaginatedResponseDto<CardDetailResponseDto> fetchAllCards(int page, int size) {
+        validatePaginationRequest(page, size);
+
+        log.info("page={}, size={}", page, size);
+
+        // a fixed order is needed for stable pages; without it the database may return rows in any order
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+
+        Page<CardDetailResponseDto> cards = cardsRepository.findAll(pageable)
+                .map(CardsMapper::mapToCardDetailDto);
+
+        return PaginatedResponseDto.from(cards);
     }
 //
 //    @Override
@@ -431,6 +452,17 @@ public class CardsServiceImpl implements ICardsService {
 
         if (!request.getCvv().matches("\\d{3}")) {
             throw new IllegalArgumentException("cvv must be 3 digits");
+        }
+    }
+
+    private void validatePaginationRequest(int page, int size) {
+        if (page < 0) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "page cannot be negative.");
+        }
+
+        if (size < 1 || size > CardsConstants.MAX_PAGE_SIZE) {
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST,
+                    "size must be between 1 and " + CardsConstants.MAX_PAGE_SIZE + ".");
         }
     }
 

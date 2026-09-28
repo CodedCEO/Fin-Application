@@ -20,11 +20,11 @@ public class ActivateCardRequestDto {
     private String defaultPin;
 
     @NotBlank(message = "newPin is required")
-    @Pattern(regexp = "\\d{4}", message = "defaultPin must be 4 digits")
+    @Pattern(regexp = "\\d{4}", message = "newPin must be 4 digits")
     private String newPin;
 
     @NotBlank(message = "cvv is required")
-    @Pattern(regexp = "\\d{3}", message = "defaultPin must be 3 digits")
+    @Pattern(regexp = "\\d{3}", message = "cvv must be 3 digits")
     private String cvv;
 
 }
