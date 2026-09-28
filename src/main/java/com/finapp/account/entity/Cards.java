@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "cards")
@@ -48,8 +49,15 @@ public class Cards extends BaseEntity {
     @Column(name = "card_expiration", nullable = false)
     private String expiration;
 
-    @Column(name = "is_card_active", nullable = false)
-    private boolean cardActive;
+    @Column(name = "is_card_activated", nullable = false)
+    private boolean cardActivated;
+
+    @Column(name = "card_activated_at", nullable = false)
+    private LocalDateTime cardActivatedAt;
+
+    @Column(name = "card_status", nullable = false)
+    private String cardStatus;
+
 
     @Column(name = "encrypted_pin")
     private String encryptedPin;

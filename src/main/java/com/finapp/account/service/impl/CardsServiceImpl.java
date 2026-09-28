@@ -2,6 +2,7 @@ package com.finapp.account.service.impl;
 
 import com.finapp.account.dto.request.ActivateCardRequestDto;
 import com.finapp.account.entity.Account;
+import com.finapp.account.enums.Status;
 import com.finapp.account.exception.FinAppValidationException;
 import com.finapp.account.repository.AccountsRepository;
 import com.finapp.account.repository.CustomerRepository;
@@ -78,15 +79,12 @@ public class CardsServiceImpl implements ICardsService {
 
         Long accountNumber = Long.parseLong(requestCardDto.getAccountNumber().trim());
 
-        Account account = accountsRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND,
-                        "Account does not exist or is inactive. Kindly contact your business concierge"));
+        Account account = validateAccount(accountNumber);
 
         if (!Boolean.TRUE.equals(account.isAccountActive())) {
             throw new FinAppValidationException(HttpStatus.NOT_FOUND,
                     "Account does not exist or is inactive. Kindly contact your business concierge");
         }
-
 
         BigDecimal accountBalance = account.getAccountBalance();
 
@@ -109,7 +107,8 @@ public class CardsServiceImpl implements ICardsService {
 
         cards.setReference(trackingReference);
         cards.setCardName(customerName);
-        cards.setCardActive(false);
+        cards.setCardActivated(false);
+        cards.setCardStatus(Status.PENDING_ACTIVATION.name());
         cards.setCardFee(cardType.getFee());
         cards.setEncryptedCvv(hashCvv(cvv));
         cards.setExpiration(expiry);
@@ -144,8 +143,12 @@ public class CardsServiceImpl implements ICardsService {
         Cards card = cardsRepository.findByAccountNumber(activateCardRequestDto.getAccountNumber())
                 .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "No card found"));
 
-        if(card.isCardActive()){
+        if(card.isCardActivated()){
             throw new FinAppValidationException(HttpStatus.FORBIDDEN,"Card is already activated");
+        }
+
+        if(!validateCardStatus(card)) {
+            throw new FinAppValidationException(HttpStatus.FORBIDDEN, "Card is inactive. Kindly contact your business concierge");
         }
 
         boolean defaultPinMatch = verifyPin(activateCardRequestDto.getDefaultPin().trim(), card.getEncryptedPin());
@@ -159,7 +162,9 @@ public class CardsServiceImpl implements ICardsService {
         String hashNewPin = hashPin(activateCardRequestDto.getNewPin().trim());
 
         card.setEncryptedPin(hashNewPin);
-        card.setCardActive(true);
+        card.setCardActivated(true);
+        card.setCardStatus(Status.ACTIVE.name());
+        card.setCardActivatedAt(LocalDateTime.now());
         card.setUpdatedAt(LocalDateTime.now());
 
         cardsRepository.save(card);
@@ -176,6 +181,17 @@ public class CardsServiceImpl implements ICardsService {
 //    public boolean deleteCard(Long cardId) {
 //        return false;
 //    }
+
+    private boolean validateCardStatus(Cards card) {
+        boolean status = false;
+
+        if(Status.ACTIVE.name().equals(card.getCardStatus())) {
+            return true;
+        }
+
+        return status;
+
+    }
 
 
     private String generateCardPan(int panLength) {
@@ -199,7 +215,6 @@ public class CardsServiceImpl implements ICardsService {
 
         // Generate Luhn check digit
         int checkDigit = calculateLuhnCheckDigit(pan.toString());
-
         pan.append(checkDigit);
 
         return pan.toString();
@@ -402,6 +417,13 @@ public class CardsServiceImpl implements ICardsService {
             throw new IllegalArgumentException("cvv must be 3 digits");
         }
     }
+
+    private Account validateAccount(Long accountNumber) {
+        return accountsRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND,
+                        "Account does not exist or is inactive. Kindly contact your business concierge"));
+    }
+
 
 
 }
