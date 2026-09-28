@@ -20,6 +20,7 @@ import com.finapp.account.enums.RequestMode;
 import com.finapp.account.mapper.CardsMapper;
 import com.finapp.account.repository.CardsRepository;
 import com.finapp.account.service.ICardsService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -258,7 +259,6 @@ public class CardsServiceImpl implements ICardsService {
         if(verifyPin(updateCardStatusRequestDto.getCurrentPin(), card.getEncryptedPin()) && account.isAccountActive()) {
             card.setCardStatus(Status.INACTIVE.name());
             card.setCardCanTransact(false);
-            card.
             card.setUpdatedAt(LocalDateTime.now());
 
             cardsRepository.save(card);
@@ -310,11 +310,34 @@ public class CardsServiceImpl implements ICardsService {
         log.info("Card with accountNumber={} is successfully reactivated",accNumber);
 
     }
-//
-//    @Override
-//    public boolean deleteCard(Long cardId) {
-//        return false;
-//    }
+
+    @Override
+    @Transactional
+    public void deleteCard(String accountNumber) {
+        if (StringUtils.hasText(accountNumber)){
+            throw new FinAppValidationException(HttpStatus.BAD_REQUEST, "Account number is required");
+        }
+
+        if (accountNumber.trim().length() != 10){
+            throw new FinAppValidationException(HttpStatus.NOT_ACCEPTABLE, "Account number must be 10 digits");
+        }
+
+        String cleanedAccNumber = accountNumber.trim();
+        Account account = accountsRepository.findByAccountNumber(Long.parseLong(cleanedAccNumber))
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "Account not found."));
+
+
+        Cards card = cardsRepository.findByAccountNumber(cleanedAccNumber)
+                .orElseThrow(() -> new FinAppValidationException(HttpStatus.NOT_FOUND, "Card not found."));
+
+        if(account != null) {
+            if (card != null) {
+                cardsRepository.delete(card);
+            }
+        }
+        log.info("Card with accountNumber={} is successfully deleted", cleanedAccNumber);
+
+    }
 
     private boolean validateCardStatus(Cards card) {
         boolean status = false;
@@ -584,6 +607,8 @@ public class CardsServiceImpl implements ICardsService {
 
         return cardFeeCollectionAccount;
     }
+
+
 
 
 

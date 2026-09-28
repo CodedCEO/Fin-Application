@@ -14,7 +14,6 @@ public interface ICardsService {
     PaginatedResponseDto<CardDetailResponseDto> fetchAllCards(int page, int size);
     void deactivateCard(UpdateCardStatusRequestDto updateCardStatusRequestDto);
     void reactivateCard(UpdateCardStatusRequestDto updateCardStatusRequestDto);
+    void deleteCard(String accountNumber);
 
-//    //boolean updateCard(CardsDto cardsDto);
-//    boolean deleteCard(Long cardId);
 }
