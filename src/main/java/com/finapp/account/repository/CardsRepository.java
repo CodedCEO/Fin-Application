@@ -13,7 +13,7 @@ public interface CardsRepository extends JpaRepository<Cards, Long> {
    // void createCards(String cardDto);
    // boolean activateCard(CardsDto cardsDto);
    // boolean deactivateCard(String CardNumber);
-    //boolean updateCard(CardsDto cardsDto);
+   // boolean updateCard(CardsDto cardsDto);
   //  boolean deleteCard(Long cardId);
 }
 
