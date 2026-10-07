@@ -10,6 +10,8 @@ import com.finapp.account.dto.response.FinappCustomResponseDto;
 import com.finapp.account.dto.response.PaginatedResponseDto;
 import com.finapp.account.enums.Status;
 import com.finapp.account.service.ICardsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,11 +20,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/cards")
+@Tag(
+        name = "CRUD REST APIs for Cards in FinApp",
+        description = "REST APIs in FinApp to CREATE, ACTIVATE, FETCH, DEACTIVATE, REACTIVATE AND DELETE card details"
+)
 public class CardsController {
 
     @Autowired
     private ICardsService iCardsService;
 
+    @Operation(
+            summary = "Create Card REST API",
+            description = "REST API to create a new card for an existing account inside FinApp"
+    )
     @PostMapping("/create")
     public ResponseEntity<FinappCustomResponseDto<CardCreationResponseDto>> createCard(
             @Valid @RequestBody RequestCardDto requestCardDto) {
@@ -41,6 +51,10 @@ public class CardsController {
 
     }
 
+    @Operation(
+            summary = "Activate Card REST API",
+            description = "REST API to activate a card using the default PIN and CVV, and set a new PIN"
+    )
     @PostMapping("/activate")
     public ResponseEntity<FinappCustomResponseDto<Void>> activateCard(
             @Valid @RequestBody ActivateCardRequestDto activateCardRequestDto) {
@@ -59,6 +73,10 @@ public class CardsController {
 
     }
 
+    @Operation(
+            summary = "Fetch Card Details REST API",
+            description = "REST API to fetch card details based on an account number"
+    )
     @GetMapping("/{accountNumber}")
     public ResponseEntity<FinappCustomResponseDto<CardDetailResponseDto>> getSingleCard(
             @PathVariable(name = "accountNumber") String accountNumber) {
@@ -77,6 +95,10 @@ public class CardsController {
 
     }
 
+    @Operation(
+            summary = "Fetch All Cards REST API",
+            description = "REST API to fetch a paginated list of all cards"
+    )
     @GetMapping
     public ResponseEntity<FinappCustomResponseDto<PaginatedResponseDto<CardDetailResponseDto>>> getAllCards(
             @RequestParam(name = "page", defaultValue = CardsConstants.DEFAULT_PAGE_NUMBER) int page,
@@ -96,6 +118,10 @@ public class CardsController {
 
     }
 
+    @Operation(
+            summary = "Deactivate Card REST API",
+            description = "REST API to deactivate an active card so it can no longer transact"
+    )
     @PatchMapping("/deactivate")
     public ResponseEntity<FinappCustomResponseDto<Void>> deactivateCard(
             @Valid @RequestBody UpdateCardStatusRequestDto updateCardStatusRequestDto) {
@@ -114,6 +140,10 @@ public class CardsController {
 
     }
 
+    @Operation(
+            summary = "Reactivate Card REST API",
+            description = "REST API to reactivate a previously deactivated card"
+    )
     @PatchMapping("/reactivate")
     public ResponseEntity<FinappCustomResponseDto<Void>> reactivateCard(
             @Valid @RequestBody UpdateCardStatusRequestDto updateCardStatusRequestDto) {
@@ -132,6 +162,10 @@ public class CardsController {
 
     }
 
+    @Operation(
+            summary = "Delete Card REST API",
+            description = "REST API to delete a card based on an account number"
+    )
     @DeleteMapping("/delete")
     public ResponseEntity<FinappCustomResponseDto<Void>> deleteCard(
             @Valid @PathVariable(name = "accountNumber") String accountNumber) {

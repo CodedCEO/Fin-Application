@@ -1,9 +1,10 @@
 package com.finapp.account.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -11,44 +12,28 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @MappedSuperclass
-//@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(AuditingEntityListener.class) //Makes JPA call that Auditing infrastructure for the entity
 @Getter @Setter
 public class BaseEntity {
 
-//    @CreatedDate
+    @CreatedDate
     @Column( updatable = false)
     private LocalDateTime createdAt;
 
 
-//    @CreatedBy
+    @CreatedBy
     @Column(updatable = false)
     private String createdBy;
 
-//    @LastModifiedDate
+    @LastModifiedDate
     @Column(insertable = false)
     private LocalDateTime updatedAt;
 
-//    @LastModifiedBy
+    @LastModifiedBy
     @Column(insertable = false)
     private String updatedBy;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        if (this.createdBy == null) {
-            this.createdBy = "SYSTEM"; // Fallback default value
-        }
-    }
 
-    // 3. Pro-Tip: Add a companion hook to handle modifications automatically
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-        if (this.updatedBy == null) {
-            this.updatedBy = "SYSTEM"; // Fallback default value
-        }
-    }
 }

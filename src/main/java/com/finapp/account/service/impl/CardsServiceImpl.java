@@ -188,7 +188,6 @@ public class CardsServiceImpl implements ICardsService {
         card.setCardCanTransact(true);
         card.setCardStatus(Status.ACTIVE.name());
         card.setCardActivatedAt(LocalDateTime.now());
-        card.setUpdatedAt(LocalDateTime.now());
 
         cardsRepository.save(card);
 
@@ -259,7 +258,6 @@ public class CardsServiceImpl implements ICardsService {
         if(verifyPin(updateCardStatusRequestDto.getCurrentPin(), card.getEncryptedPin()) && account.isAccountActive()) {
             card.setCardStatus(Status.INACTIVE.name());
             card.setCardCanTransact(false);
-            card.setUpdatedAt(LocalDateTime.now());
 
             cardsRepository.save(card);
         }
@@ -302,7 +300,6 @@ public class CardsServiceImpl implements ICardsService {
         if(verifyPin(updateCardStatusRequestDto.getCurrentPin(), card.getEncryptedPin()) && account.isAccountActive()) {
             card.setCardStatus(Status.ACTIVE.name());
             card.setCardCanTransact(true);
-            card.setUpdatedAt(LocalDateTime.now());
 
             cardsRepository.save(card);
         }
