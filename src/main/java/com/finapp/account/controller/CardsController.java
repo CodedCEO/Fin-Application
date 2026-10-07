@@ -3,8 +3,8 @@ package com.finapp.account.controller;
 import com.finapp.account.constants.CardsConstants;
 import com.finapp.account.dto.request.ActivateCardRequestDto;
 import com.finapp.account.dto.request.CardDetailResponseDto;
-import com.finapp.account.dto.request.UpdateCardStatusRequestDto;
 import com.finapp.account.dto.request.RequestCardDto;
+import com.finapp.account.dto.request.UpdateCardStatusRequestDto;
 import com.finapp.account.dto.response.CardCreationResponseDto;
 import com.finapp.account.dto.response.FinappCustomResponseDto;
 import com.finapp.account.dto.response.PaginatedResponseDto;
@@ -24,10 +24,6 @@ import org.springframework.web.bind.annotation.*;
 )
 @RestController
 @RequestMapping("/api/cards")
-@Tag(
-        name = "CRUD REST APIs for Cards in FinApp",
-        description = "REST APIs in FinApp to CREATE, ACTIVATE, FETCH, DEACTIVATE, REACTIVATE AND DELETE card details"
-)
 public class CardsController {
 
     @Autowired
@@ -35,11 +31,7 @@ public class CardsController {
 
     @Operation(
             summary = "Create Card REST API",
-<<<<<<< HEAD
-            description = "REST API to create a new card for an existing account inside FinApp"
-=======
             description = "REST API to create a new card inside FinApp"
->>>>>>> 231d2bc (Add OpenAPI Operation annotations to CardsController and upgrade Lombok to 1.18.36)
     )
     @PostMapping("/create")
     public ResponseEntity<FinappCustomResponseDto<CardCreationResponseDto>> createCard(
@@ -60,11 +52,7 @@ public class CardsController {
 
     @Operation(
             summary = "Activate Card REST API",
-<<<<<<< HEAD
-            description = "REST API to activate a card using the default PIN and CVV, and set a new PIN"
-=======
             description = "REST API to activate a card inside FinApp"
->>>>>>> 231d2bc (Add OpenAPI Operation annotations to CardsController and upgrade Lombok to 1.18.36)
     )
     @PostMapping("/activate")
     public ResponseEntity<FinappCustomResponseDto<Void>> activateCard(
@@ -106,11 +94,7 @@ public class CardsController {
 
     @Operation(
             summary = "Fetch All Cards REST API",
-<<<<<<< HEAD
-            description = "REST API to fetch a paginated list of all cards"
-=======
             description = "REST API to fetch paginated card details inside FinApp"
->>>>>>> 231d2bc (Add OpenAPI Operation annotations to CardsController and upgrade Lombok to 1.18.36)
     )
     @GetMapping
     public ResponseEntity<FinappCustomResponseDto<PaginatedResponseDto<CardDetailResponseDto>>> getAllCards(
@@ -132,11 +116,7 @@ public class CardsController {
 
     @Operation(
             summary = "Deactivate Card REST API",
-<<<<<<< HEAD
-            description = "REST API to deactivate an active card so it can no longer transact"
-=======
             description = "REST API to deactivate an active card inside FinApp"
->>>>>>> 231d2bc (Add OpenAPI Operation annotations to CardsController and upgrade Lombok to 1.18.36)
     )
     @PatchMapping("/deactivate")
     public ResponseEntity<FinappCustomResponseDto<Void>> deactivateCard(
@@ -157,11 +137,7 @@ public class CardsController {
 
     @Operation(
             summary = "Reactivate Card REST API",
-<<<<<<< HEAD
-            description = "REST API to reactivate a previously deactivated card"
-=======
             description = "REST API to reactivate a card inside FinApp"
->>>>>>> 231d2bc (Add OpenAPI Operation annotations to CardsController and upgrade Lombok to 1.18.36)
     )
     @PatchMapping("/reactivate")
     public ResponseEntity<FinappCustomResponseDto<Void>> reactivateCard(
@@ -182,15 +158,9 @@ public class CardsController {
 
     @Operation(
             summary = "Delete Card REST API",
-<<<<<<< HEAD
-            description = "REST API to delete a card based on an account number"
-    )
-    @DeleteMapping("/delete")
-=======
             description = "REST API to delete card details based on an account number"
     )
     @DeleteMapping("/delete/{accountNumber}")
->>>>>>> 231d2bc (Add OpenAPI Operation annotations to CardsController and upgrade Lombok to 1.18.36)
     public ResponseEntity<FinappCustomResponseDto<Void>> deleteCard(
             @PathVariable(name = "accountNumber") String accountNumber) {
 
