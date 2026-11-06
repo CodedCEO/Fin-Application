@@ -88,7 +88,7 @@ public class CardsController {
         );
 
         return ResponseEntity
-                .status(HttpStatus.FOUND)
+                .status(HttpStatus.OK)
                 .body(responseBody);
     }
 

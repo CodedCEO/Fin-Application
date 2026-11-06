@@ -22,4 +22,6 @@ public class CardDetailResponseDto {
     private String cardStatus;
     private boolean canTransact;
     private boolean cardActivated;
+
+
 }

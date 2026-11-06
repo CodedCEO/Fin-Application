@@ -1,0 +1,46 @@
+﻿name: fin-application
+
+services:
+  cards-db:
+    image: mysql:8.0
+    container_name: cards-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: cardsdb
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: cardsuser
+      MYSQL_PASSWORD: cardspassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - cards_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -prootpassword || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 90s
+
+  cards-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shadowbrynes/cards-service:v1.0.0
+    container_name: cards-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - SERVER_PORT=8085
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_DATASOURCE_URL=jdbc:mysql://cards-db:3306/cardsdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=cardsuser
+      - SPRING_DATASOURCE_PASSWORD=cardspassword
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - ACCOUNT_SERVICE_URL=http://localhost:8085
+    depends_on:
+      cards-db:
+        condition: service_healthy
+
+volumes:
+  cards_db_data:

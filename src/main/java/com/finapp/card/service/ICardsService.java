@@ -6,6 +6,7 @@ import com.finapp.card.dto.request.UpdateCardStatusRequestDto;
 import com.finapp.card.dto.request.RequestCardDto;
 import com.finapp.card.dto.response.CardCreationResponseDto;
 import com.finapp.card.dto.response.PaginatedResponseDto;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ICardsService {
     CardCreationResponseDto createCard(RequestCardDto requestCardDto);
@@ -16,4 +17,6 @@ public interface ICardsService {
     void reactivateCard(UpdateCardStatusRequestDto updateCardStatusRequestDto);
     void deleteCard(String accountNumber);
 
+    @Transactional
+    void createCard(Long accountNumber);
 }
