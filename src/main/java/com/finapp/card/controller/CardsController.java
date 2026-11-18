@@ -1,6 +1,7 @@
 package com.finapp.card.controller;
 
 import com.finapp.card.constants.CardsConstants;
+import com.finapp.card.dto.CardsContactInfoDto;
 import com.finapp.card.dto.request.ActivateCardRequestDto;
 import com.finapp.card.dto.request.CardDetailResponseDto;
 import com.finapp.card.dto.request.RequestCardDto;
@@ -28,6 +29,9 @@ public class CardsController {
 
     @Autowired
     private ICardsService iCardsService;
+
+    @Autowired
+    private CardsContactInfoDto cardsContactInfoDto;
 
     @Operation(
             summary = "Create Card REST API",
@@ -69,6 +73,17 @@ public class CardsController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(responseBody);
+    }
+
+    @Operation(
+            summary = "Get Contact Info",
+            description = "Contact Info details that can be reached out in case of any issues"
+    )
+    @GetMapping("/contact-info")
+    public ResponseEntity<CardsContactInfoDto> getContactInfo() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(cardsContactInfoDto);
     }
 
     @Operation(
